@@ -8,31 +8,9 @@ builds. This is done by adding an optional cache of your requirement python
 packages and speed up docker. The outcome is faster development without
 breaking builds.
 
-# Getting started
+# 部署
 
-## Installation
-
-`docker pull muccg/devpi`
-
-## Quickstart
-
-Start using
-
-```bash
-docker run -d --name devpi \
-    --publish 3141:3141 \
-    --volume /srv/docker/devpi:/data \
-    --env=DEVPI_PASSWORD=changemetoyourlongsecret \
-    --restart always \
-    muccg/devpi
-```
-
-*Alternatively, you can use the sample [docker-compose.yml](docker-compose.yml)
-file to start the container using [Docker
-Compose](https://docs.docker.com/compose/)*
-
-Please set ``DEVPI_PASSWORD`` to a secret otherwise an attacker can *execute
-arbitrary code*.
+使用 lain4 部署.
 
 ## Client side usage
 

@@ -1,0 +1,85 @@
+{{- range $deployName, $deployment := .Values.deployments  }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Values.appname }}-{{ $deployName }}
+  labels:
+    {{- include "chart.labels" $ | nindent 4 }}
+spec:
+  replicas: {{ $deployment.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "chart.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/instance: {{ $.Values.appname }}-{{ $deployName }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ $.Values.appname }}-{{ $deployName }}
+        {{- include "chart.selectorLabels" $ | nindent 8 }}
+    spec:
+      serviceAccountName: default
+      {{- with $deployment.podSecurityContext }}
+      securityContext:
+        {{- toYaml $deployment.podSecurityContext | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.hostAliases }}
+      hostAliases:
+        {{- toYaml $.Values.hostAliases | nindent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ default 30 $deployment.terminationGracePeriodSeconds }}
+      containers:
+        - name: {{ $deployName }}
+          command:
+            {{- toYaml $deployment.command | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: {{ $.Values.appname }}-env
+          env:
+            {{- if hasKey $.Values "env" }}
+            {{- range $index, $element := $.Values.env }}
+            - name: {{ $index | quote }}
+              value: {{ $element | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if hasKey $deployment "env" }}
+            {{- range $index, $element := $deployment.env }}
+            - name: {{ $index | quote }}
+              value: {{ $element | quote }}
+            {{- end }}
+            {{- end }}
+          {{- if hasKey $deployment "image" }}
+          image: {{ $deployment.image }}
+          {{- else if hasKey $deployment "imageTag" }}
+          image: {{ printf "%s/%s:%s" $.Values.registry $.Values.appname $deployment.imageTag }}
+          {{- else }}
+          image: {{ include "chart.image" $ }}
+          {{- end }}
+          imagePullPolicy: IfNotPresent
+          {{- with $deployment.containerPort }}
+          ports:
+            - containerPort: {{ $deployment.containerPort }}
+              protocol: TCP
+          {{- end }}
+          {{- with $deployment.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml $deployment.resources | nindent 12 }}
+          volumeMounts:
+            {{- range $volumeMount := $.Values.volumeMounts  }}
+            - name: {{ default "secret" $volumeMount.name }}
+              mountPath: {{ $volumeMount.mountPath }}
+              {{- if hasKey $volumeMount "subPath" }}
+              subPath: {{ $volumeMount.subPath }}
+              {{- end }}
+            {{- end }}
+      volumes:
+        {{- with $.Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        - name: secret
+          secret:
+            secretName: {{ $.Values.appname }}-secret
+{{- end }}
