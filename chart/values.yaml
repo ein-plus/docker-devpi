@@ -85,6 +85,8 @@ deployments:
       - '1800'
       - '--request-timeout'
       - '1800'
+      - '--outside-url'
+      - 'https://pypi.in.ein.plus'
     # 描述你的容器会暴露哪个端口, 对于声明了端口的 deployment, helm template 会帮你渲染出 service
     # service 在 Kubernetes 里相当于一系列 [容器 IP]:[port] 的集合, 每一个端点都可以提供服务
     # 类似于一个 nginx upstream 里可以写好多个 server, 自己想象吧
