@@ -67,10 +67,10 @@ deployments:
         cpu: 1000m  # 1000m is equivalent to 1 CPU
         # memory 千万不要写小 m 啊, m 是一个小的要死的单位, 写上去一定会突破容器的最低内存导致无法启动, 要写 M, Mi, G, Gi 这种才好
         # ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory
-        memory: 2Gi
+        memory: 2.5Gi
       requests:
         cpu: 10m
-        memory: 2Gi
+        memory: 2.5Gi
     # 仅支持 exec 写法, 一定要封闭在 [] 里边, 不要写成字符串了
     command:
       - '/docker-entrypoint.sh'
